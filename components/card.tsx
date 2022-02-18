@@ -5,11 +5,12 @@ import words from 'lodash/fp/words';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useQuery } from 'react-query';
+import pokeball from '../public/images/pokeball.png';
 import { getPokemonFromUrl } from '../services';
 import { randomColors } from '../util';
 
 export default function Card({ pokemon }: { pokemon: API.Species }) {
-  const { data } = useQuery(['pokemon', pokemon.url], () => getPokemonFromUrl(pokemon.url), { enabled: !!pokemon.url });
+  const { data } = useQuery(['pokemon', pokemon.url], () => getPokemonFromUrl(pokemon.url));
 
   if (!data) {
     return null;
@@ -26,8 +27,8 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
           backgroundColor: randomColors(pokemon.name),
         }}
         className={classNames(
-          'flex justify-center items-center flex-col overflow-hidden',
-          'w-60 mx-2 mb-3 text-xs',
+          'group flex justify-center items-center flex-col overflow-hidden',
+          'w-60 mx-3 mb-5 text-xs',
           'shadow-lg rounded-lg hover:shadow-2xl',
           'transition-all duration-200 ease-in-out hover:-translate-y-2',
         )}
@@ -46,9 +47,13 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
             style={{ width: 80, height: 80 }}
             className={classNames(
               'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0',
-              'rounded-full inset-x-auto mx-auto bg-white opacity-40',
+              'rounded-full bg-white opacity-20',
+              'transition-transform duration-300 ease-in-out group-hover:rotate-180',
             )}
-          ></div>
+          >
+            <Image width={80} height={80} alt="pokeball" src={pokeball}></Image>
+          </div>
+
           <Image
             alt={pokemon.name}
             width={100}

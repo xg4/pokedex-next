@@ -27,17 +27,17 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
           backgroundColor: randomColors(pokemon.name),
         }}
         className={classNames(
-          'group flex justify-center items-center flex-col overflow-hidden',
-          'w-60 mx-3 mb-5 text-xs',
-          'shadow-lg rounded-lg hover:shadow-2xl',
+          'group flex flex-col items-center justify-center overflow-hidden',
+          'mx-3 mb-5 w-60 text-xs',
+          'rounded-lg shadow-lg hover:shadow-2xl',
           'transition-all duration-200 ease-in-out hover:-translate-y-2',
         )}
       >
-        <div className="w-full relative flex items-center pt-20 justify-center">
+        <div className="relative flex w-full items-center justify-center pt-20">
           <div
             className={classNames(
               'absolute top-5 left-5',
-              'text-3xl font-semibold text-black text-opacity-25 pointer-events-none',
+              'pointer-events-none text-3xl font-semibold text-black text-opacity-25',
             )}
           >
             #{id}
@@ -46,7 +46,7 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
           <div
             style={{ width: 80, height: 80 }}
             className={classNames(
-              'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0',
+              'absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2',
               'rounded-full bg-white opacity-20',
               'transition-transform duration-300 ease-in-out group-hover:rotate-180',
             )}
@@ -61,8 +61,8 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
             src={data.sprites.other?.dream_world.front_default || data.sprites.front_default}
           ></Image>
         </div>
-        <div className="w-full bg-white flex justify-center flex-col items-center pt-5 pb-8">
-          <h3 style={{ color }} className="capitalize font-semibold text-3xl mb-2">
+        <div className="flex w-full flex-col items-center justify-center bg-white pt-5 pb-8">
+          <h3 style={{ color }} className="mb-2 text-3xl font-semibold capitalize">
             {pokemon.name}
           </h3>
           <div>
@@ -72,7 +72,7 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
                 <span
                   key={type.url}
                   style={{ color }}
-                  className={classNames('font-bold uppercase text-sm mx-3 text-gray-300')}
+                  className={classNames('mx-3 text-sm font-bold uppercase text-gray-300')}
                 >
                   {type.name}
                 </span>

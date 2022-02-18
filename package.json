@@ -10,8 +10,16 @@
     "tailwindcss",
     "pokéapi"
   ],
+  "homepage": "https://github.com/xg4/pokedex-next#readme",
+  "bugs": {
+    "url": "https://github.com/xg4/pokedex-next/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xg4/pokedex-next.git"
+  },
   "license": "MIT",
-  "author": "",
+  "author": "xg4 <xingor4@gmail.com>",
   "scripts": {
     "build": "next build",
     "dev": "next dev",

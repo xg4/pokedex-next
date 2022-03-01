@@ -1,7 +1,12 @@
 import classNames from 'classnames';
+import { head, shuffle } from 'lodash/fp';
+import compact from 'lodash/fp/compact';
+import get from 'lodash/fp/get';
 import last from 'lodash/fp/last';
+import map from 'lodash/fp/map';
 import pipe from 'lodash/fp/pipe';
 import words from 'lodash/fp/words';
+import startCase from 'lodash/startCase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useQuery } from 'react-query';
@@ -9,17 +14,46 @@ import pokeball from '../public/images/pokeball.png';
 import { getPokemon } from '../services';
 import { randomColors } from '../util';
 
-export default function Card({ pokemon }: { pokemon: API.Species }) {
-  const { data } = useQuery(['pokemon', pokemon.url], () => getPokemon(pokemon.url));
+function Pokeball() {
+  return (
+    <div
+      style={{ width: 80, height: 80 }}
+      className={classNames(
+        'absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2',
+        'rounded-full bg-white opacity-20',
+        'transition-transform duration-300 ease-in-out group-hover:rotate-180',
+      )}
+    >
+      <Image width={80} height={80} alt="pokeball" src={pokeball}></Image>
+    </div>
+  );
+}
 
-  if (!data) {
-    return null;
-  }
+const ZERO_IMAGE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/0.png';
+
+export default function Card({ pokemon }: { pokemon: API.Species }) {
+  const { data, isLoading } = useQuery(['pokemon', pokemon.url], () => getPokemon(pokemon.url));
 
   const color = randomColors(pokemon.name);
 
   const id = pipe(words, last)(pokemon.url);
 
+  const imageKeys = [
+    'other.dream_world.front_default',
+    'other.home.front_default',
+    'other.official-artwork.front_default',
+    'front_default',
+  ];
+  const image =
+    pipe(
+      map(get),
+      map((_get: any) => _get(data?.sprites)),
+      compact,
+      shuffle,
+      head,
+    )(imageKeys) ?? ZERO_IMAGE;
+
+  const types = data?.types || [];
   return (
     <Link href={`/pokemon?url=${encodeURIComponent(pokemon.url)}`}>
       <a
@@ -28,9 +62,10 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
         }}
         className={classNames(
           'group flex flex-col items-center justify-center overflow-hidden',
-          'mx-3 mb-5 w-60 text-xs',
+          'mx-3 mb-5 w-60 pb-10 text-xs',
           'rounded-lg shadow-lg hover:shadow-2xl',
           'transition-all duration-200 ease-in-out hover:-translate-y-2',
+          { 'blur-sm': isLoading },
         )}
       >
         <div className="relative flex w-full items-center justify-center pt-20">
@@ -43,41 +78,38 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
             #{id}
           </div>
 
+          <Pokeball />
+
+          <div style={{ width: 100, height: 100 }}>
+            <Image alt={pokemon.name} width={100} height={100} src={image} />
+          </div>
+        </div>
+        <div className="relative w-full">
+          <div className="absolute inset-0 bg-white/40 blur-xl"></div>
+
           <div
-            style={{ width: 80, height: 80 }}
             className={classNames(
-              'absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2',
-              'rounded-full bg-white opacity-20',
-              'transition-transform duration-300 ease-in-out group-hover:rotate-180',
+              'flex w-full flex-col items-center justify-center',
+              'bg-white/30 pt-5 pb-8 backdrop-blur',
             )}
           >
-            <Image width={80} height={80} alt="pokeball" src={pokeball}></Image>
-          </div>
-
-          <Image
-            alt={pokemon.name}
-            width={100}
-            height={100}
-            src={data.sprites.other?.dream_world.front_default || data.sprites.front_default}
-          ></Image>
-        </div>
-        <div className="flex w-full flex-col items-center justify-center bg-white pt-5 pb-8">
-          <h3 style={{ color }} className="mb-2 text-3xl font-semibold capitalize">
-            {pokemon.name}
-          </h3>
-          <div>
-            {data.types.map(({ type }) => {
-              const color = randomColors(type.name);
-              return (
-                <span
-                  key={type.url}
-                  style={{ color }}
-                  className={classNames('mx-3 text-sm font-bold uppercase text-gray-300')}
-                >
-                  {type.name}
-                </span>
-              );
-            })}
+            <h3 style={{ color }} className="mb-2 w-full truncate break-words px-2 text-center text-3xl font-semibold">
+              {startCase(pokemon.name)}
+            </h3>
+            <div>
+              {types.map(({ type }) => {
+                const color = randomColors(type.name);
+                return (
+                  <span
+                    key={type.url}
+                    style={{ color }}
+                    className={classNames('mx-3 text-sm font-bold uppercase text-gray-300')}
+                  >
+                    {type.name}
+                  </span>
+                );
+              })}
+            </div>
           </div>
         </div>
       </a>

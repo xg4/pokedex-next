@@ -1,18 +1,24 @@
+import flatMap from 'lodash/flatMap';
+import random from 'lodash/random';
 import type { NextPage } from 'next';
-import { dehydrate, QueryClient, useQuery } from 'react-query';
+import { useEffect, useRef } from 'react';
+import { dehydrate, QueryClient, useInfiniteQuery } from 'react-query';
+import { useIntersection } from 'react-use';
 import Card from '../components/card';
 import { getPokemons } from '../services';
+
+const initUrl = `https://pokeapi.co/api/v2/pokemon?limit=20&offset=${random(0, 1000)}`;
 
 export async function getStaticProps() {
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery('pokemons', () => getPokemons());
+  await queryClient.prefetchQuery('pokemons', () => getPokemons(initUrl));
   // const result = queryClient.getQueryData<API.Pokemons>('pokemons');
 
   // if (result) {
   //   await Promise.all(
   //     result.results.map((pokemon) =>
-  //       queryClient.prefetchQuery(['pokemon', pokemon.url], () => getPokemonFromUrl(pokemon.url)),
+  //       queryClient.prefetchQuery(['pokemon', pokemon.url], () => getPokemon(pokemon.url)),
   //     ),
   //   );
   // }
@@ -24,7 +30,28 @@ export async function getStaticProps() {
 }
 
 const Home: NextPage = () => {
-  const { data } = useQuery('pokemons', () => getPokemons());
+  const intersectionRef = useRef(null);
+  const intersection = useIntersection(intersectionRef, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 1,
+  });
+
+  const { data, hasNextPage, fetchNextPage, isFetching, isFetchedAfterMount } = useInfiniteQuery(
+    'pokemons',
+    ({ pageParam = initUrl }) => getPokemons(pageParam),
+    {
+      getNextPageParam: (lastPage) => lastPage.next,
+    },
+  );
+
+  useEffect(() => {
+    if (hasNextPage && intersection?.isIntersecting && isFetchedAfterMount) {
+      fetchNextPage();
+    }
+  }, [intersection, hasNextPage, isFetchedAfterMount]);
+
+  const list = flatMap(data?.pages, (item) => item.results);
 
   return (
     <>
@@ -34,9 +61,21 @@ const Home: NextPage = () => {
         </div>
       </header>
       <div className="container mx-auto flex flex-wrap justify-around p-6">
-        {data?.results.map((pokemon) => (
+        {list.map((pokemon) => (
           <Card key={pokemon.url} pokemon={pokemon} />
         ))}
+      </div>
+      <div className="flex items-center justify-center p-5">
+        <button
+          ref={intersectionRef}
+          disabled={isFetching}
+          onClick={() => {
+            fetchNextPage();
+          }}
+          className="text-green-500"
+        >
+          {isFetching ? '加载中...' : '加载更多'}
+        </button>
       </div>
     </>
   );

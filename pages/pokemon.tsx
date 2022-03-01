@@ -2,7 +2,7 @@ import isString from 'lodash/isString';
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { dehydrate, QueryClient, useQuery } from 'react-query';
-import { getPokemonFromUrl } from '../services';
+import { getPokemon } from '../services';
 
 function isPokemonUrl(url: any): url is string {
   return isString(url) && url.startsWith('https://pokeapi.co/api/v2/pokemon/');
@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery(['pokemon', url], () => getPokemonFromUrl(url));
+  await queryClient.prefetchQuery(['pokemon', url], () => getPokemon(url));
 
   return {
     props: {
@@ -33,6 +33,8 @@ export default function Pokemon() {
 
   const { url } = router.query;
 
-  const { data } = useQuery(['pokemon', url], () => getPokemonFromUrl(url as string), { enabled: isPokemonUrl(url) });
+  const { data } = useQuery(['pokemon', url], () => getPokemon(url as string), {
+    enabled: isPokemonUrl(url),
+  });
   return <div>{JSON.stringify(data, null, 2)}</div>;
 }

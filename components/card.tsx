@@ -6,11 +6,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useQuery } from 'react-query';
 import pokeball from '../public/images/pokeball.png';
-import { getPokemonFromUrl } from '../services';
+import { getPokemon } from '../services';
 import { randomColors } from '../util';
 
 export default function Card({ pokemon }: { pokemon: API.Species }) {
-  const { data } = useQuery(['pokemon', pokemon.url], () => getPokemonFromUrl(pokemon.url));
+  const { data } = useQuery(['pokemon', pokemon.url], () => getPokemon(pokemon.url));
 
   if (!data) {
     return null;

@@ -6,11 +6,6 @@ declare namespace API {
     results: Species[];
   }
 
-  export interface PokemonsParams {
-    limit: number;
-    offset: number;
-  }
-
   export interface Pokemon {
     abilities: Ability[];
     base_experience: number;

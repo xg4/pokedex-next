@@ -1,7 +1,7 @@
 import classNames from 'classnames';
-import { head, shuffle } from 'lodash/fp';
 import compact from 'lodash/fp/compact';
 import get from 'lodash/fp/get';
+import head from 'lodash/fp/head';
 import last from 'lodash/fp/last';
 import map from 'lodash/fp/map';
 import pipe from 'lodash/fp/pipe';
@@ -44,12 +44,11 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
     'other.official-artwork.front_default',
     'front_default',
   ];
-  const image =
+  const image: string =
     pipe(
       map(get),
       map((_get: any) => _get(data?.sprites)),
       compact,
-      shuffle,
       head,
     )(imageKeys) ?? ZERO_IMAGE;
 
@@ -58,7 +57,7 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
     <Link href={`/pokemon?url=${encodeURIComponent(pokemon.url)}`}>
       <a
         style={{
-          backgroundColor: randomColors(pokemon.name),
+          backgroundColor: color,
         }}
         className={classNames(
           'group flex flex-col items-center justify-center overflow-hidden',
@@ -85,12 +84,10 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
           </div>
         </div>
         <div className="relative w-full">
-          <div className="absolute inset-0 bg-white/40 blur-xl"></div>
-
           <div
             className={classNames(
               'flex w-full flex-col items-center justify-center',
-              'bg-white/30 pt-5 pb-8 backdrop-blur',
+              'bg-white/75 pt-5 pb-8 backdrop-filter',
             )}
           >
             <h3 style={{ color }} className="mb-2 w-full truncate break-words px-2 text-center text-3xl font-semibold">

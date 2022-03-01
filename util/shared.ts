@@ -1,9 +1,7 @@
 import head from 'lodash/fp/head';
 import pipe from 'lodash/fp/pipe';
 import shuffle from 'lodash/fp/shuffle';
-import LRU from 'lru-cache';
-
-const colorsCache = new LRU<string, string>({ max: 1000 });
+import memoize from 'lodash/memoize';
 
 const colors = [
   '#64748b',
@@ -30,17 +28,8 @@ const colors = [
   '#f43f5e',
 ];
 
-export function randomColors(key?: string): string {
-  if (!key) {
-    return pipe(shuffle, head)(colors);
-  }
-
-  const savedColor = colorsCache.get(key);
-  if (savedColor) {
-    return savedColor;
-  }
-
-  const color = pipe(shuffle, head)(colors);
-  colorsCache.set(key, color);
-  return color;
+function _randomColors(key: string): string {
+  return pipe(shuffle, head)(colors);
 }
+
+export const randomColors = memoize(_randomColors);

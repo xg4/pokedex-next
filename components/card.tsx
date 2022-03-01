@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import compact from 'lodash/fp/compact';
+import defaultTo from 'lodash/fp/defaultTo';
 import get from 'lodash/fp/get';
 import head from 'lodash/fp/head';
 import last from 'lodash/fp/last';
@@ -44,13 +45,13 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
     'other.official-artwork.front_default',
     'front_default',
   ];
-  const image: string =
-    pipe(
-      map(get),
-      map((_get: any) => _get(data?.sprites)),
-      compact,
-      head,
-    )(imageKeys) ?? ZERO_IMAGE;
+  const image: string = pipe(
+    map(get),
+    map((_get: any) => _get(data?.sprites)),
+    compact,
+    head,
+    defaultTo(ZERO_IMAGE),
+  )(imageKeys);
 
   const types = data?.types || [];
   return (

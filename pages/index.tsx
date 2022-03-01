@@ -1,21 +1,21 @@
 import type { NextPage } from 'next';
 import { dehydrate, QueryClient, useQuery } from 'react-query';
 import Card from '../components/card';
-import { getPokemonFromUrl, getPokemons } from '../services';
+import { getPokemons } from '../services';
 
 export async function getStaticProps() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery('pokemons', () => getPokemons());
-  const result = queryClient.getQueryData<API.Pokemons>('pokemons');
+  // const result = queryClient.getQueryData<API.Pokemons>('pokemons');
 
-  if (result) {
-    await Promise.all(
-      result.results.map((pokemon) =>
-        queryClient.prefetchQuery(['pokemon', pokemon.url], () => getPokemonFromUrl(pokemon.url)),
-      ),
-    );
-  }
+  // if (result) {
+  //   await Promise.all(
+  //     result.results.map((pokemon) =>
+  //       queryClient.prefetchQuery(['pokemon', pokemon.url], () => getPokemonFromUrl(pokemon.url)),
+  //     ),
+  //   );
+  // }
   return {
     props: {
       dehydratedState: dehydrate(queryClient),

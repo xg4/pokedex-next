@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { useQuery } from 'react-query';
 import pokeball from '../public/images/pokeball.png';
 import { getPokemon } from '../services';
-import { randomColors } from '../util';
+import { getColorByPokemonTypeMemoized } from '../util';
 
 function Pokeball() {
   return (
@@ -35,8 +35,6 @@ const ZERO_IMAGE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/spr
 export default function Card({ pokemon }: { pokemon: API.Species }) {
   const { data, isLoading } = useQuery(['pokemon', pokemon.url], () => getPokemon(pokemon.url));
 
-  const color = randomColors(pokemon.name);
-
   const id = pipe(words, last)(pokemon.url);
 
   const imageKeys = [
@@ -54,6 +52,7 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
   )(imageKeys);
 
   const types = data?.types || [];
+  const color = getColorByPokemonTypeMemoized(types[0]?.type.name);
   return (
     <Link href={`/pokemon?url=${encodeURIComponent(pokemon.url)}`}>
       <a
@@ -96,7 +95,7 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
             </h3>
             <div>
               {types.map(({ type }) => {
-                const color = randomColors(type.name);
+                const color = getColorByPokemonTypeMemoized(type.name);
                 return (
                   <span
                     key={type.url}

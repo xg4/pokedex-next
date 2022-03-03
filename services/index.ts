@@ -1,9 +1,21 @@
+import { Item, Pokemon, PokemonSpecies, Result } from '../types';
 import { request } from '../util';
 
-export function getPokemons(url: string): Promise<API.Pokemons> {
-  return request.get(url);
+const LIMIT = 20;
+
+export function getPokemonsByPage(page: number): Promise<Result<Item>> {
+  return request.get('/pokemon', {
+    params: {
+      limit: LIMIT,
+      offset: (page - 1) * LIMIT,
+    },
+  });
 }
 
-export function getPokemon(url: string): Promise<API.Pokemon> {
-  return request.get(url);
+export function getPokemonById(id: string | number): Promise<Pokemon> {
+  return request.get(`/pokemon/${id}`);
+}
+
+export function getPokemonSpeciesById(id: string | number): Promise<PokemonSpecies> {
+  return request.get(`/pokemon-species/${id}`);
 }

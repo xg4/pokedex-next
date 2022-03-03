@@ -1,33 +1,31 @@
+import divide from 'lodash/divide';
 import flatMap from 'lodash/flatMap';
-import random from 'lodash/random';
 import type { NextPage } from 'next';
 import { useEffect, useRef } from 'react';
-import { dehydrate, QueryClient, useInfiniteQuery } from 'react-query';
+import { useInfiniteQuery } from 'react-query';
 import { useIntersection } from 'react-use';
 import Card from '../components/card';
-import { getPokemons } from '../services';
+import { getPokemonsByPage } from '../services';
 
-const initUrl = `https://pokeapi.co/api/v2/pokemon?limit=20&offset=${random(0, 1000)}`;
+// export async function getStaticProps() {
+//   const queryClient = new QueryClient();
 
-export async function getStaticProps() {
-  const queryClient = new QueryClient();
+//   await queryClient.prefetchQuery('pokemons', () => getPokemons(initUrl));
+//   const result = queryClient.getQueryData<API.Pokemons>('pokemons');
 
-  await queryClient.prefetchQuery('pokemons', () => getPokemons(initUrl));
-  // const result = queryClient.getQueryData<API.Pokemons>('pokemons');
-
-  // if (result) {
-  //   await Promise.all(
-  //     result.results.map((pokemon) =>
-  //       queryClient.prefetchQuery(['pokemon', pokemon.url], () => getPokemon(pokemon.url)),
-  //     ),
-  //   );
-  // }
-  return {
-    props: {
-      dehydratedState: dehydrate(queryClient),
-    },
-  };
-}
+//   if (result) {
+//     await Promise.all(
+//       result.results.map((pokemon) =>
+//         queryClient.prefetchQuery(['pokemon', pokemon.url], () => getPokemon(pokemon.url)),
+//       ),
+//     );
+//   }
+//   return {
+//     props: {
+//       dehydratedState: dehydrate(queryClient),
+//     },
+//   };
+// }
 
 const Home: NextPage = () => {
   const intersectionRef = useRef(null);
@@ -39,9 +37,20 @@ const Home: NextPage = () => {
 
   const { data, hasNextPage, fetchNextPage, isFetching, isFetchedAfterMount } = useInfiniteQuery(
     'pokemons',
-    ({ pageParam = initUrl }) => getPokemons(pageParam),
+    ({ pageParam = 1 }) => getPokemonsByPage(pageParam),
     {
-      getNextPageParam: (lastPage) => lastPage.next,
+      getNextPageParam(lastPage, pages) {
+        if (lastPage.next) {
+          const searchParams = new URL(lastPage.next).searchParams;
+          const limit = searchParams.get('limit');
+          const offset = searchParams.get('offset');
+          if (!offset || !limit) {
+            return false;
+          }
+          return divide(parseInt(offset), parseInt(limit)) + 1;
+        }
+        return false;
+      },
     },
   );
 
@@ -72,7 +81,7 @@ const Home: NextPage = () => {
           onClick={() => {
             fetchNextPage();
           }}
-          className="text-green-500"
+          className="text-red-500"
         >
           {isFetching ? '加载中...' : '加载更多'}
         </button>

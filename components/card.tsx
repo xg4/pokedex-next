@@ -12,7 +12,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useQuery } from 'react-query';
 import pokeball from '../public/images/pokeball.png';
-import { getPokemon } from '../services';
+import { getPokemonById } from '../services';
+import { Item } from '../types';
 import { getColorByPokemonTypeMemoized } from '../util';
 
 function Pokeball() {
@@ -32,10 +33,9 @@ function Pokeball() {
 
 const ZERO_IMAGE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/0.png';
 
-export default function Card({ pokemon }: { pokemon: API.Species }) {
-  const { data, isLoading } = useQuery(['pokemon', pokemon.url], () => getPokemon(pokemon.url));
-
+export default function Card({ pokemon }: { pokemon: Item }) {
   const id = pipe(words, last)(pokemon.url);
+  const { data, isLoading } = useQuery(['pokemon', id], () => getPokemonById(id!));
 
   const imageKeys = [
     'other.dream_world.front_default',
@@ -54,7 +54,7 @@ export default function Card({ pokemon }: { pokemon: API.Species }) {
   const types = data?.types || [];
   const color = getColorByPokemonTypeMemoized(types[0]?.type.name);
   return (
-    <Link href={`/pokemon?url=${encodeURIComponent(pokemon.url)}`}>
+    <Link href={`/_/${id}`}>
       <a
         style={{
           backgroundColor: color,

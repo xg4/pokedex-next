@@ -1,4 +1,4 @@
-import { Item, Pokemon, PokemonSpecies, Result } from '../types';
+import { Ability, Item, Pokemon, PokemonSpecies, Result } from '../types';
 import { request } from '../util';
 
 const LIMIT = 20;
@@ -18,4 +18,8 @@ export function getPokemonById(id: string | number): Promise<Pokemon> {
 
 export function getPokemonSpeciesById(id: string | number): Promise<PokemonSpecies> {
   return request.get(`/pokemon-species/${id}`);
+}
+
+export function getAbilityById(id: string | number): Promise<Ability> {
+  return request.get(`/ability/${id}`);
 }

@@ -16,6 +16,21 @@ export type Item = {
 //   url: string;
 // };
 
+export type Name = {
+  name: string;
+  language: {
+    name: string;
+    url: string;
+  };
+};
+
+export type Ability = {
+  name: string;
+  id: number;
+  names: Name[];
+  flavor_text_entries: FlavorText[];
+};
+
 export type PokemonSpecies = {
   id: number;
   name: string;
@@ -25,7 +40,7 @@ export type PokemonSpecies = {
   pokedex_number: string;
   base_experience: number;
   types: Item[];
-  // stats: Stat[];
+  names: Name[];
   height: number;
   weight: number;
   abilites: Item[];
@@ -40,7 +55,7 @@ export type FlavorText = {
   version: Item;
 };
 
-export type Ability = {
+export type PokemonAbility = {
   ability: Item;
   is_hidden: boolean;
   slot: number;
@@ -91,7 +106,7 @@ export type Stat = {
 };
 
 export interface Pokemon {
-  abilities: Ability[];
+  abilities: PokemonAbility[];
   base_experience: number;
   forms: Item[];
   height: number;

@@ -15,7 +15,7 @@ import startCase from 'lodash/startCase';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useQuery } from 'react-query';
-import Ability from '../../components/Ability';
+import Ability from '../../components/ability';
 import { getPokemonById, getPokemonSpeciesById } from '../../services';
 import { FlavorText, Name } from '../../types';
 import { getColorByPokemonTypeMemoized } from '../../util';

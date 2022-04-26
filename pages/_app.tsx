@@ -1,16 +1,16 @@
-import type { AppProps } from 'next/app';
-import Head from 'next/head';
-import { useState } from 'react';
-import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
-import '../styles/tailwind.css';
+import type { AppProps } from 'next/app'
+import Head from 'next/head'
+import { useState } from 'react'
+import { Hydrate, QueryClient, QueryClientProvider } from 'react-query'
+import '../styles/tailwind.css'
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: { queries: { refetchOnWindowFocus: false } },
-      }),
-  );
+      })
+  )
   return (
     <>
       <Head>
@@ -19,7 +19,10 @@ function MyApp({ Component, pageProps }: AppProps) {
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
         />
         <title>Pok&#xE9;</title>
-        <meta name="description" content="A simple pokédex made with React & Next.js & PokéAPI & Tailwindcss" />
+        <meta
+          name="description"
+          content="A simple pokédex made with React & Next.js & PokéAPI & Tailwindcss"
+        />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -29,7 +32,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         </Hydrate>
       </QueryClientProvider>
     </>
-  );
+  )
 }
 
-export default MyApp;
+export default MyApp

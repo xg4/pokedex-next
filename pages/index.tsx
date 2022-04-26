@@ -1,11 +1,11 @@
-import divide from 'lodash/divide';
-import flatMap from 'lodash/flatMap';
-import type { NextPage } from 'next';
-import { useEffect, useRef } from 'react';
-import { useInfiniteQuery } from 'react-query';
-import { useIntersection } from 'react-use';
-import Card from '../components/card';
-import { getPokemonsByPage } from '../services';
+import divide from 'lodash/divide'
+import flatMap from 'lodash/flatMap'
+import type { NextPage } from 'next'
+import { useEffect, useRef } from 'react'
+import { useInfiniteQuery } from 'react-query'
+import { useIntersection } from 'react-use'
+import Card from '../components/card'
+import { getPokemonsByPage } from '../services'
 
 // export async function getStaticProps() {
 //   const queryClient = new QueryClient();
@@ -28,39 +28,40 @@ import { getPokemonsByPage } from '../services';
 // }
 
 const Home: NextPage = () => {
-  const intersectionRef = useRef(null);
+  const intersectionRef = useRef(null)
   const intersection = useIntersection(intersectionRef, {
     root: null,
     rootMargin: '0px',
     threshold: 1,
-  });
+  })
 
-  const { data, hasNextPage, fetchNextPage, isFetching, isFetchedAfterMount } = useInfiniteQuery(
-    'pokemons',
-    ({ pageParam = 1 }) => getPokemonsByPage(pageParam),
-    {
-      getNextPageParam(lastPage, pages) {
-        if (lastPage.next) {
-          const searchParams = new URL(lastPage.next).searchParams;
-          const limit = searchParams.get('limit');
-          const offset = searchParams.get('offset');
-          if (!offset || !limit) {
-            return false;
+  const { data, hasNextPage, fetchNextPage, isFetching, isFetchedAfterMount } =
+    useInfiniteQuery(
+      'pokemons',
+      ({ pageParam = 1 }) => getPokemonsByPage(pageParam),
+      {
+        getNextPageParam(lastPage, pages) {
+          if (lastPage.next) {
+            const searchParams = new URL(lastPage.next).searchParams
+            const limit = searchParams.get('limit')
+            const offset = searchParams.get('offset')
+            if (!offset || !limit) {
+              return false
+            }
+            return divide(parseInt(offset), parseInt(limit)) + 1
           }
-          return divide(parseInt(offset), parseInt(limit)) + 1;
-        }
-        return false;
-      },
-    },
-  );
+          return false
+        },
+      }
+    )
 
   useEffect(() => {
     if (hasNextPage && intersection?.isIntersecting && isFetchedAfterMount) {
-      fetchNextPage();
+      fetchNextPage()
     }
-  }, [intersection, hasNextPage, isFetchedAfterMount]);
+  }, [intersection, hasNextPage, isFetchedAfterMount])
 
-  const list = flatMap(data?.pages, (item) => item.results);
+  const list = flatMap(data?.pages, (item) => item.results)
 
   return (
     <>
@@ -79,7 +80,7 @@ const Home: NextPage = () => {
           ref={intersectionRef}
           disabled={isFetching}
           onClick={() => {
-            fetchNextPage();
+            fetchNextPage()
           }}
           className="text-red-500"
         >
@@ -87,7 +88,7 @@ const Home: NextPage = () => {
         </button>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

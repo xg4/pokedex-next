@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from 'axios'
 
 export const request = axios.create({
   baseURL: 'https://pokeapi.co/api/v2',
@@ -6,11 +6,11 @@ export const request = axios.create({
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
-});
+})
 
 request.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    return Promise.reject(error);
-  },
-);
+    return Promise.reject(error)
+  }
+)

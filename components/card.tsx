@@ -12,10 +12,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useQuery } from 'react-query'
 import { ZERO_IMAGE } from '../constants'
+import { getColorByPokemonTypeMemoized } from '../helpers'
 import pokeball from '../public/images/pokeball.png'
 import { getPokemonById } from '../services'
 import { Item } from '../types'
-import { getColorByPokemonTypeMemoized } from '../helpers'
 
 function Pokeball() {
   return (
@@ -54,7 +54,7 @@ export default function Card({ pokemon }: { pokemon: Item }) {
   const types = data?.types || []
   const color = getColorByPokemonTypeMemoized(types[0]?.type.name)
   return (
-    <Link href={`/_/${id}`}>
+    <Link href={`/${id}`}>
       <a
         style={{
           backgroundColor: color,

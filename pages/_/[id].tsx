@@ -18,7 +18,7 @@ import { useQuery } from 'react-query'
 import Ability from '../../components/ability'
 import { getPokemonById, getPokemonSpeciesById } from '../../services'
 import { FlavorText, Name } from '../../types'
-import { getColorByPokemonTypeMemoized } from '../../util'
+import { getColorByPokemonTypeMemoized } from '../../helpers'
 
 const ZERO_IMAGE =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/0.png'

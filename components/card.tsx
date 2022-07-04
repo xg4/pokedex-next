@@ -15,7 +15,7 @@ import { ZERO_IMAGE } from '../constants'
 import pokeball from '../public/images/pokeball.png'
 import { getPokemonById } from '../services'
 import { Item } from '../types'
-import { getColorByPokemonTypeMemoized } from '../util'
+import { getColorByPokemonTypeMemoized } from '../helpers'
 
 function Pokeball() {
   return (

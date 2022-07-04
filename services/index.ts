@@ -1,5 +1,5 @@
 import { Ability, Item, Pokemon, PokemonSpecies, Result } from '../types'
-import { request } from '../util'
+import { request } from '../helpers'
 
 const LIMIT = 20
 

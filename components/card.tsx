@@ -11,6 +11,7 @@ import startCase from 'lodash/startCase'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useQuery } from 'react-query'
+import { ZERO_IMAGE } from '../constants'
 import pokeball from '../public/images/pokeball.png'
 import { getPokemonById } from '../services'
 import { Item } from '../types'
@@ -31,9 +32,6 @@ function Pokeball() {
   )
 }
 
-const ZERO_IMAGE =
-  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/0.png'
-
 export default function Card({ pokemon }: { pokemon: Item }) {
   const id = pipe(words, last)(pokemon.url)
   const { data, isLoading } = useQuery(['pokemon', id], () =>
@@ -47,8 +45,7 @@ export default function Card({ pokemon }: { pokemon: Item }) {
     'front_default',
   ]
   const image: string = pipe(
-    map(get),
-    map((_get: any) => _get(data?.sprites)),
+    map((path: string) => get(path)(data?.sprites)),
     compact,
     head,
     defaultTo(ZERO_IMAGE)

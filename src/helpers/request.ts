@@ -1,16 +1,9 @@
-import axios from 'axios'
+import ky from 'ky'
 
-export const request = axios.create({
-  baseURL: 'https://pokeapi.co/api/v2',
+export const request = ky.create({
+  prefixUrl: 'https://pokeapi.co/api/v2',
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 })
-
-request.interceptors.response.use(
-  (response) => response.data,
-  (error) => {
-    return Promise.reject(error)
-  }
-)

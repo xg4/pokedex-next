@@ -1,20 +1,12 @@
+import { useQuery } from '@tanstack/react-query'
 import classNames from 'classnames'
-import compact from 'lodash/fp/compact'
-import defaultTo from 'lodash/fp/defaultTo'
-import get from 'lodash/fp/get'
-import head from 'lodash/fp/head'
-import last from 'lodash/fp/last'
-import map from 'lodash/fp/map'
-import pipe from 'lodash/fp/pipe'
-import words from 'lodash/fp/words'
-import startCase from 'lodash/startCase'
-import Image from 'next/image'
+import { compact, defaultTo, get, head, map, pipe } from 'lodash/fp'
 import Link from 'next/link'
-import { useQuery } from 'react-query'
 import { ZERO_IMAGE } from '../constants'
-import { getColorByPokemonTypeMemoized } from '../helpers'
+import { getColorByPokemonTypeMemoized, getIdByUrl } from '../helpers'
 import { getPokemonById } from '../services'
 import { Item } from '../types'
+import Name from './Name'
 
 function Pokeball() {
   return (
@@ -23,17 +15,20 @@ function Pokeball() {
       className={classNames(
         'absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2',
         'rounded-full bg-white opacity-20',
-        'transition-transform duration-300 ease-in-out group-hover:rotate-180',
+        'transition-transform duration-300 ease-out group-hover:rotate-180',
       )}
     >
-      <Image width={80} height={80} alt="pokeball" src="/images/pokeball.png"></Image>
+      <img alt="pokeball" src="/images/pokeball.png" className="h-20 w-20 object-contain" />
     </div>
   )
 }
 
-export default function Card({ pokemon }: { pokemon: Item }) {
-  const id = pipe(words, last)(pokemon.url)
-  const { data, isLoading } = useQuery(['pokemon', id], () => getPokemonById(id!))
+export default function Card({ pokemon, className }: { pokemon: Item; className?: string }) {
+  const id = getIdByUrl(pokemon.url)
+  const { data, isLoading } = useQuery({
+    queryKey: ['pokemon', id],
+    queryFn: () => getPokemonById(id!),
+  })
 
   const imageKeys = [
     'other.dream_world.front_default',
@@ -57,8 +52,9 @@ export default function Card({ pokemon }: { pokemon: Item }) {
         backgroundColor: color,
       }}
       className={classNames(
+        className,
         'group flex flex-col items-center justify-center overflow-hidden',
-        'mx-3 mb-5 w-60 pb-10 text-xs',
+        'w-60 pb-10 text-xs',
         'rounded-lg shadow-lg hover:shadow-2xl',
         'transition-all duration-200 ease-in-out hover:-translate-y-2',
         { 'blur-sm': isLoading },
@@ -76,19 +72,20 @@ export default function Card({ pokemon }: { pokemon: Item }) {
 
         <Pokeball />
 
-        <div style={{ width: 100, height: 100 }}>
-          <Image alt={pokemon.name} width={100} height={100} src={image} />
+        <div className="z-10">
+          <img alt={pokemon.name} src={image} className="h-24 w-24 object-contain" />
         </div>
       </div>
       <div className="relative w-full">
+        <div className="absolute inset-0 bg-white/60 blur-xl"></div>
         <div
           className={classNames(
-            'flex w-full flex-col items-center justify-center',
-            'bg-white/75 pb-8 pt-5 backdrop-filter',
+            'relative z-50 flex w-full flex-col items-center justify-center',
+            'bg-transparent pb-8 pt-5',
           )}
         >
-          <h3 style={{ color }} className="mb-2 w-full truncate break-words px-2 text-center text-3xl font-semibold">
-            {startCase(pokemon.name)}
+          <h3 className="mb-2 w-full truncate break-words px-2 text-center text-3xl font-semibold text-gray-600">
+            <Name id={id} />
           </h3>
           <div>
             {types.map(({ type }) => {

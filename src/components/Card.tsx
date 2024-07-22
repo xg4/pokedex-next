@@ -1,12 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
+'use client'
+
+import { useQueries, useQuery } from '@tanstack/react-query'
 import classNames from 'classnames'
-import { compact, defaultTo, get, head, map, pipe } from 'lodash/fp'
-import Link from 'next/link'
-import { ZERO_IMAGE } from '../constants'
-import { getColorByPokemonTypeMemoized, getIdByUrl } from '../helpers'
-import { getPokemonById } from '../services'
-import { Item } from '../types'
-import Name from './Name'
+import ky from 'ky'
+import { useRouter } from 'next/navigation'
+import PokeAPI from 'pokedex-promise-v2'
+import { useCallback, useRef } from 'react'
+import { useIntersection } from 'react-use'
+import { getColorByType, getImageBySprites } from '../helpers'
 
 function Pokeball() {
   return (
@@ -23,31 +24,58 @@ function Pokeball() {
   )
 }
 
-export default function Card({ pokemon, className }: { pokemon: Item; className?: string }) {
-  const id = getIdByUrl(pokemon.url)
-  const { data, isLoading } = useQuery({
-    queryKey: ['pokemon', id],
-    queryFn: () => getPokemonById(id!),
+export default function Card({ url, className }: { url: string; className?: string }) {
+  const intersectionRef = useRef<HTMLButtonElement>(null)
+
+  const intersection = useIntersection(intersectionRef, {
+    root: null,
+    rootMargin: '500px',
+    threshold: 1,
   })
 
-  const imageKeys = [
-    'other.dream_world.front_default',
-    'other.home.front_default',
-    'other.official-artwork.front_default',
-    'front_default',
-  ]
-  const image: string = pipe(
-    map((path: string) => get(path)(data?.sprites)),
-    compact,
-    head,
-    defaultTo(ZERO_IMAGE),
-  )(imageKeys)
+  const { data: pokemon, isLoading: loading } = useQuery({
+    queryKey: ['pokemon', url],
+    queryFn: () => ky.get(url).json<PokeAPI.Pokemon>(),
+    enabled: !!intersection?.isIntersecting,
+  })
 
-  const types = data?.types || []
-  const color = getColorByPokemonTypeMemoized(types[0]?.type.name)
+  const { data: species, isLoading: loading2 } = useQuery({
+    queryKey: ['pokemon-species', pokemon?.species.url],
+    queryFn: () => ky.get(pokemon!.species.url).json<PokeAPI.PokemonSpecies>(),
+    enabled: !!pokemon && !!intersection?.isIntersecting,
+  })
+
+  const typesData = useQueries({
+    queries: (pokemon?.types || []).map(i => ({
+      queryKey: ['pokemon-type', i.type.url],
+      queryFn: () => ky.get(i.type.url).json<PokeAPI.Type>(),
+      enabled: !!pokemon,
+    })),
+  })
+
+  const isLoading = loading || loading2 || typesData.some(i => i.isLoading)
+
+  const router = useRouter()
+
+  const handleClick = useCallback(() => {
+    if (!pokemon?.name) {
+      return
+    }
+    router.push(pokemon.name)
+  }, [pokemon?.name, router])
+
+  const name = species?.names.find(i => i.language.name === 'zh-Hans')
+
+  const image = getImageBySprites(pokemon?.sprites)
+
+  const types = pokemon?.types || []
+
+  const [color] = getColorByType(types.filter(i => i.type.name !== 'normal').map(i => i.type.name))
+
   return (
-    <Link
-      href={`/${id}`}
+    <button
+      ref={intersectionRef}
+      onClick={handleClick}
       style={{
         backgroundColor: color,
       }}
@@ -61,48 +89,54 @@ export default function Card({ pokemon, className }: { pokemon: Item; className?
       )}
     >
       <div className="relative flex w-full items-center justify-center pt-20">
-        <div
-          className={classNames(
-            'absolute left-5 top-5',
-            'pointer-events-none text-3xl font-semibold text-black text-opacity-25',
-          )}
-        >
-          #{id}
-        </div>
+        {pokemon ? (
+          <div
+            className={classNames(
+              'absolute left-5 top-5',
+              'pointer-events-none text-3xl font-semibold text-black text-opacity-25',
+            )}
+          >
+            #{pokemon.id}
+          </div>
+        ) : null}
 
         <Pokeball />
 
         <div className="z-10">
-          <img alt={pokemon.name} src={image} className="h-24 w-24 object-contain" />
+          <img alt={name?.name} src={image} className="h-24 w-24 object-contain" />
         </div>
       </div>
-      <div className="relative w-full">
-        <div className="absolute inset-0 bg-white/60 blur-xl"></div>
+      {name ? (
         <div
           className={classNames(
             'relative z-50 flex w-full flex-col items-center justify-center',
             'bg-transparent pb-8 pt-5',
+            'bg-white/80 shadow-lg backdrop-blur-2xl',
           )}
         >
-          <h3 className="mb-2 w-full truncate break-words px-2 text-center text-3xl font-semibold text-gray-600">
-            <Name id={id} />
+          <h3 style={{ color }} className="mb-2 w-full truncate break-words px-2 text-center text-3xl font-semibold">
+            {name?.name}
           </h3>
-          <div>
-            {types.map(({ type }) => {
-              const color = getColorByPokemonTypeMemoized(type.name)
+          <ul className="flex flex-wrap justify-center gap-3">
+            {typesData.map(item => {
+              if (!item.data) {
+                return null
+              }
+              const color = getColorByType(item.data.name)
+              const name = item.data.names.find(t => t.language.name === 'zh-Hans')
               return (
-                <span
-                  key={type.url}
+                <li
+                  key={name?.name}
                   style={{ color }}
-                  className={classNames('mx-3 text-sm font-bold uppercase text-gray-300')}
+                  className={classNames('text-sm font-bold uppercase text-gray-300')}
                 >
-                  {type.name}
-                </span>
+                  {name?.name}
+                </li>
               )
             })}
-          </div>
+          </ul>
         </div>
-      </div>
-    </Link>
+      ) : null}
+    </button>
   )
 }

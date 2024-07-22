@@ -1,31 +1,11 @@
 'use client'
 
 import { useInfiniteQuery } from '@tanstack/react-query'
-import divide from 'lodash/divide'
+import ky from 'ky'
+import PokeAPI from 'pokedex-promise-v2'
 import { useEffect, useRef } from 'react'
 import { useIntersection } from 'react-use'
 import Card from '../components/Card'
-import { getPokemonList } from '../services'
-
-// export async function getStaticProps() {
-//   const queryClient = new QueryClient();
-
-//   await queryClient.prefetchQuery('pokemons', () => getPokemons(initUrl));
-//   const result = queryClient.getQueryData<API.Pokemons>('pokemons');
-
-//   if (result) {
-//     await Promise.all(
-//       result.results.map((pokemon) =>
-//         queryClient.prefetchQuery(['pokemon', pokemon.url], () => getPokemon(pokemon.url)),
-//       ),
-//     );
-//   }
-//   return {
-//     props: {
-//       dehydratedState: dehydrate(queryClient),
-//     },
-//   };
-// }
 
 export default function Page() {
   const intersectionRef = useRef(null)
@@ -36,23 +16,10 @@ export default function Page() {
   })
 
   const { data, hasNextPage, fetchNextPage, isFetching, isFetchedAfterMount } = useInfiniteQuery({
-    queryKey: ['pokemons'],
-    queryFn({ pageParam }) {
-      return getPokemonList(pageParam)
-    },
-    getNextPageParam(lastPage, pages) {
-      if (lastPage.next) {
-        const searchParams = new URL(lastPage.next).searchParams
-        const limit = searchParams.get('limit')
-        const offset = searchParams.get('offset')
-        if (!offset || !limit) {
-          return
-        }
-        return divide(parseInt(offset), parseInt(limit)) + 1
-      }
-      return
-    },
-    initialPageParam: 1,
+    queryKey: ['pokemon-list'],
+    queryFn: ({ pageParam }) => ky.get(pageParam).json<PokeAPI.NamedAPIResourceList>(),
+    getNextPageParam: lastPage => lastPage.next,
+    initialPageParam: 'https://pokeapi.co/api/v2/pokemon?limit=20&offset=0',
   })
 
   useEffect(() => {
@@ -71,7 +38,7 @@ export default function Page() {
       </header>
       <section className="flex justify-center">
         <div className="flex flex-wrap justify-center gap-10 p-6">
-          {list?.map(pokemon => <Card key={pokemon.url} pokemon={pokemon} />)}
+          {list?.map(pokemon => <Card key={pokemon.url} url={pokemon.url} />)}
         </div>
       </section>
       <div className="flex items-center justify-center p-5">
@@ -81,7 +48,7 @@ export default function Page() {
           onClick={() => {
             fetchNextPage()
           }}
-          className="text-red-500"
+          className="text-gray-500"
         >
           {isFetching ? '加载中...' : '加载更多'}
         </button>

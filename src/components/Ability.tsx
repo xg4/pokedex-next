@@ -1,24 +1,29 @@
+'use client'
+
 import { useQuery } from '@tanstack/react-query'
-import { getAbilityById } from '../services'
+import ky from 'ky'
+import PokeAPI from 'pokedex-promise-v2'
 
 interface Props {
-  id: string
+  url: string
   isHidden: boolean
 }
 
-export default function Ability({ id, isHidden }: Props) {
+export default function Ability({ url, isHidden }: Props) {
   const { data } = useQuery({
-    queryKey: ['ability', id],
-    queryFn() {
-      return getAbilityById(id)
-    },
+    queryKey: ['ability', url],
+    queryFn: () => ky.get(url).json<PokeAPI.Ability>(),
   })
+
+  if (!data) {
+    return
+  }
 
   const name = data?.names.find(i => i.language.name === 'zh-Hans')
 
   return (
     <div>
-      {name?.name ?? data?.name}
+      {name?.name}
       {isHidden ? <span className="text-xs text-gray-500"> (隐藏技能)</span> : null}
     </div>
   )

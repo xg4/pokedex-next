@@ -1,73 +1,15 @@
-'use client'
+import { shuffle } from 'lodash'
+import { pipe, toString } from 'lodash/fp'
+import { getColorByType, getImageBySprites } from '../../helpers'
+import { pokedex } from '../../services'
 
-import Name from '@/components/Name'
-import { useQuery } from '@tanstack/react-query'
-import { compact, defaultTo, filter, get, head, last, map, pipe, shuffle, toString, words } from 'lodash/fp'
-import Image from 'next/image'
-import Ability from '../../components/Ability'
-import { getColorByPokemonTypeMemoized } from '../../helpers'
-import { getPokemonById, getSpeciesById } from '../../services'
-import { FlavorText } from '../../types'
+export default async function Pokemon({ params: { id } }: { params: { id: string } }) {
+  const [data, species] = await Promise.all([pokedex.getPokemonByName(id), pokedex.getPokemonSpeciesByName(id)])
+  const abilities = await Promise.all(data.abilities.map(i => pokedex.getAbilityByName(i.ability.name)))
 
-const ZERO_IMAGE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/0.png'
+  const image = getImageBySprites(data.sprites)
 
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   const { url } = context.query;
-
-//   if (!isPokemonUrl(url)) {
-//     return {
-//       notFound: true,
-//     };
-//   }
-
-//   const queryClient = new QueryClient();
-
-//   await queryClient.prefetchQuery(['pokemon', url], () => getPokemon(url));
-
-//   return {
-//     props: {
-//       dehydratedState: dehydrate(queryClient),
-//     },
-//   };
-// };
-
-export default function Pokemon({ params: { id } }: { params: { id: string } }) {
-  const { data } = useQuery({
-    queryKey: ['pokemon', id],
-    queryFn() {
-      return getPokemonById(id)
-    },
-    enabled: !!id,
-  })
-
-  const { data: species } = useQuery({
-    queryKey: ['pokemonSpecies', id],
-    queryFn() {
-      return getSpeciesById(id)
-    },
-    enabled: !!id,
-  })
-
-  const imageKeys = [
-    'other.dream_world.front_default',
-    'other.home.front_default',
-    'other.official-artwork.front_default',
-    'front_default',
-  ]
-  const image: string = pipe(
-    map(get),
-    map((_get: any) => _get(data?.sprites)),
-    compact,
-    head,
-    defaultTo(ZERO_IMAGE),
-  )(imageKeys)
-
-  if (!data) {
-    return null
-  }
-
-  const types = data?.types || []
-  const color = getColorByPokemonTypeMemoized(head(types)?.type.name)
+  const [color] = getColorByType(data.types.filter(i => i.type.name !== 'normal').map(t => t.type.name))
 
   const genderPercentage = species && species.gender_rate !== -1 ? (species.gender_rate / 8) * 100 : -1
 
@@ -82,41 +24,49 @@ export default function Pokemon({ params: { id } }: { params: { id: string } }) 
     },
     {
       name: '性别比例',
-      value: genderPercentage == -1 ? '无性别' : `${100 - genderPercentage}%♂︎ ${genderPercentage}%♀︎`,
+      value:
+        genderPercentage == -1 ? (
+          '无性别'
+        ) : (
+          <>
+            <span className="text-blue-400">{100 - genderPercentage}%♂︎</span>
+            <span className="text-pink-400">{genderPercentage}%♀︎</span>
+          </>
+        ),
     },
     {
       name: '技能',
-      value: data.abilities.map(item => {
-        const id = pipe(words, last)(item.ability.url)
-        return id ? <Ability key={item.ability.url} isHidden={item.is_hidden} id={id} /> : null
-      }),
+      value: abilities.map((item, index) => (
+        <div key={item.id}>
+          {item.names.find(i => i.language.name === 'zh-Hans')?.name}
+          {data.abilities[index].is_hidden ? <span className="text-xs text-gray-400"> (隐藏技能)</span> : null}
+        </div>
+      )),
     },
   ]
 
-  const flavorText: FlavorText | undefined = pipe(
-    filter((i: FlavorText) => i.language.name === 'zh-Hans'),
-    shuffle,
-    head,
-  )(species?.flavor_text_entries)
+  const flavorText = species.flavor_text_entries.filter(i => i.language.name === 'zh-Hans')
+  const text = shuffle(flavorText).at(0)
 
+  const name = species.names.find(i => i.language.name === 'zh-Hans')
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto overflow-hidden rounded-xl bg-white shadow-lg">
         <div style={{ backgroundColor: color }} className="flex flex-col items-start justify-center bg-red-500 p-5">
           <span className="text-md font-medium text-white">#{data.id}</span>
           <h1 className="text-2xl text-white">
-            <Name id={id}></Name>
+            <h1 className="text-2xl text-white">{name?.name}</h1>
           </h1>
           <div className="z-10 flex w-full items-center justify-center">
-            <Image alt={data.name} width={200} height={200} src={image} />
+            <img className="h-52 w-52 object-contain" alt={data.name} src={image} />
           </div>
         </div>
 
         <div className="-translate-y-10 rounded-xl bg-white px-5 pt-10">
-          <div className="mb-5 text-gray-500">{flavorText?.flavor_text}</div>
-          <ul className="flex flex-col flex-wrap">
+          <div className="mb-5 text-gray-500">{text?.flavor_text}</div>
+          <ul className="flex flex-col gap-2">
             {profiles.map(item => (
-              <li className="flex items-center" key={item.name}>
+              <li className="flex items-start" key={item.name}>
                 <div className="flex-1 font-medium text-gray-400">{item.name}</div>
                 <div className="flex-1">{item.value}</div>
               </li>

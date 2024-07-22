@@ -18,3 +18,12 @@ export const POKEMON_TYPE_COLORS = {
   dark: '#705746',
   fairy: '#D685AD',
 } as const
+
+export const STATS_COLORS = {
+  hp: '#FF5959',
+  attack: '#F5AC78',
+  defense: '#FAE078',
+  'special-attack': '#9DB7F5',
+  'special-defense': '#A7DB8D',
+  speed: '#FA92B2',
+}

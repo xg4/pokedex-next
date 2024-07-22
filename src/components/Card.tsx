@@ -1,20 +1,22 @@
 'use client'
 
+import { STATS_COLORS } from '@/constants/colors'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import classNames from 'classnames'
 import ky from 'ky'
+import { get } from 'lodash'
 import { useRouter } from 'next/navigation'
 import PokeAPI from 'pokedex-promise-v2'
 import { useCallback, useRef } from 'react'
 import { useIntersection } from 'react-use'
 import { getColorByType, getImageBySprites } from '../helpers'
+import Progress from './Progress'
 
 function Pokeball() {
   return (
     <div
-      style={{ width: 80, height: 80 }}
       className={classNames(
-        'absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2',
+        'absolute left-1/2 top-1/2 z-0 h-20 w-20 -translate-x-1/2 -translate-y-1/2',
         'rounded-full bg-white opacity-20',
         'transition-transform duration-300 ease-out group-hover:rotate-180',
       )}
@@ -81,13 +83,20 @@ export default function Card({ url, className }: { url: string; className?: stri
       }}
       className={classNames(
         className,
-        'group flex flex-col items-center justify-center overflow-hidden',
+        'group relative flex flex-col items-center justify-center overflow-hidden',
         'w-60 pb-10 text-xs',
         'rounded-lg shadow-lg hover:shadow-2xl',
         'transition-all duration-200 ease-in-out hover:-translate-y-2',
         { 'blur-sm': isLoading },
       )}
     >
+      {pokemon ? (
+        <div className="absolute right-2 top-2 space-y-1 rounded-lg bg-white/60 p-2">
+          {pokemon.stats.map(item => (
+            <Progress key={item.stat.url} color={get(STATS_COLORS, item.stat.name)} percent={item.base_stat / 2} />
+          ))}
+        </div>
+      ) : null}
       <div className="relative flex w-full items-center justify-center pt-20">
         {pokemon ? (
           <div

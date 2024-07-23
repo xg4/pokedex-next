@@ -5,9 +5,9 @@ import { useQueries, useQuery } from '@tanstack/react-query'
 import classNames from 'classnames'
 import ky from 'ky'
 import { get } from 'lodash'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import PokeAPI from 'pokedex-promise-v2'
-import { useCallback, useRef } from 'react'
+import { useRef } from 'react'
 import { useIntersection } from 'react-use'
 import { getColorByType, getImageBySprites } from '../helpers'
 import Progress from './Progress'
@@ -27,7 +27,7 @@ function Pokeball() {
 }
 
 export default function Card({ url, className }: { url: string; className?: string }) {
-  const intersectionRef = useRef<HTMLButtonElement>(null)
+  const intersectionRef = useRef<HTMLAnchorElement>(null)
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -42,7 +42,7 @@ export default function Card({ url, className }: { url: string; className?: stri
   })
 
   const { data: species, isLoading: loading2 } = useQuery({
-    queryKey: ['pokemon-species', pokemon?.species.url],
+    queryKey: ['pokemon-species', get(pokemon, 'species.url')],
     queryFn: () => ky.get(pokemon!.species.url).json<PokeAPI.PokemonSpecies>(),
     enabled: !!pokemon && !!intersection?.isIntersecting,
   })
@@ -57,15 +57,6 @@ export default function Card({ url, className }: { url: string; className?: stri
 
   const isLoading = loading || loading2 || typesData.some(i => i.isLoading)
 
-  const router = useRouter()
-
-  const handleClick = useCallback(() => {
-    if (!pokemon?.name) {
-      return
-    }
-    router.push(pokemon.name)
-  }, [pokemon?.name, router])
-
   const name = species?.names.find(i => i.language.name === 'zh-Hans')
 
   const image = getImageBySprites(pokemon?.sprites)
@@ -75,16 +66,16 @@ export default function Card({ url, className }: { url: string; className?: stri
   const [color] = getColorByType(types.filter(i => i.type.name !== 'normal').map(i => i.type.name))
 
   return (
-    <button
+    <Link
       ref={intersectionRef}
-      onClick={handleClick}
+      href={pokemon ? pokemon.name : '/'}
       style={{
         backgroundColor: color,
       }}
       className={classNames(
         className,
         'group relative flex flex-col items-center justify-center overflow-hidden',
-        'w-60 pb-10 text-xs',
+        'h-80 w-60 pb-10 text-xs',
         'rounded-lg shadow-lg hover:shadow-2xl',
         'transition-all duration-200 ease-in-out hover:-translate-y-2',
         { 'blur-sm': isLoading },
@@ -103,7 +94,7 @@ export default function Card({ url, className }: { url: string; className?: stri
         {pokemon ? (
           <div
             className={classNames(
-              'absolute left-5 top-5',
+              'absolute left-3 top-3',
               'pointer-events-none text-3xl font-semibold text-black text-opacity-25',
             )}
           >
@@ -148,6 +139,6 @@ export default function Card({ url, className }: { url: string; className?: stri
           </ul>
         </div>
       ) : null}
-    </button>
+    </Link>
   )
 }

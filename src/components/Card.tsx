@@ -92,9 +92,11 @@ export default function Card({ url, className }: { url: string; className?: stri
     >
       {pokemon ? (
         <div className="absolute right-2 top-2 space-y-1 rounded-lg bg-white/60 p-2">
-          {pokemon.stats.map(item => (
-            <Progress key={item.stat.url} color={get(STATS_COLORS, item.stat.name)} percent={item.base_stat / 2} />
-          ))}
+          {pokemon.stats
+            .filter(item => ['hp', 'attack', 'defense', 'speed'].includes(item.stat.name))
+            .map(item => (
+              <Progress key={item.stat.url} color={get(STATS_COLORS, item.stat.name)} percent={item.base_stat / 2} />
+            ))}
         </div>
       ) : null}
       <div className="relative flex w-full items-center justify-center pt-20">

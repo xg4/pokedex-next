@@ -24,7 +24,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "prepare": "husky init",
+    "prepare": "husky",
     "start": "next start"
   },
   "lint-staged": {
@@ -34,31 +34,31 @@
     ]
   },
   "dependencies": {
-    "@tanstack/react-query": "5.51.9",
+    "@tanstack/react-query": "5.51.24",
     "classnames": "2.5.1",
     "dayjs": "1.11.12",
-    "ky": "1.4.0",
+    "ky": "1.7.0",
     "lodash": "4.17.21",
     "next": "14.2.5",
     "pokedex-promise-v2": "4.2.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-transition-group": "4.4.5",
-    "react-use": "17.5.0"
+    "usehooks-ts": "3.1.0"
   },
   "devDependencies": {
     "@types/lodash": "4.17.7",
-    "@types/node": "20.14.11",
+    "@types/node": "22.4.1",
     "@types/react": "18.3.3",
-    "@types/react-transition-group": "4.4.10",
+    "@types/react-transition-group": "4.4.11",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.5",
-    "husky": "9.1.1",
-    "lint-staged": "15.2.7",
-    "postcss": "8.4.39",
+    "husky": "9.1.4",
+    "lint-staged": "15.2.9",
+    "postcss": "8.4.41",
     "prettier": "3.3.3",
-    "prettier-plugin-tailwindcss": "0.6.5",
-    "tailwindcss": "3.4.6",
-    "typescript": "5.5.3"
+    "prettier-plugin-tailwindcss": "0.6.6",
+    "tailwindcss": "3.4.10",
+    "typescript": "5.5.4"
   }
 }

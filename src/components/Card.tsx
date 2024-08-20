@@ -7,8 +7,7 @@ import ky from 'ky'
 import { get } from 'lodash'
 import Link from 'next/link'
 import PokeAPI from 'pokedex-promise-v2'
-import { useRef } from 'react'
-import { useIntersection } from 'react-use'
+import { useIntersectionObserver } from 'usehooks-ts'
 import { getColorByType, getImageBySprites } from '../helpers'
 import Progress from './Progress'
 
@@ -27,9 +26,7 @@ function Pokeball() {
 }
 
 export default function Card({ url, className }: { url: string; className?: string }) {
-  const intersectionRef = useRef<HTMLAnchorElement>(null)
-
-  const intersection = useIntersection(intersectionRef, {
+  const { isIntersecting, ref } = useIntersectionObserver({
     root: null,
     rootMargin: '500px',
     threshold: 1,
@@ -38,13 +35,13 @@ export default function Card({ url, className }: { url: string; className?: stri
   const { data: pokemon, isLoading: loading } = useQuery({
     queryKey: ['pokemon', url],
     queryFn: () => ky.get(url).json<PokeAPI.Pokemon>(),
-    enabled: !!intersection?.isIntersecting,
+    enabled: !!isIntersecting,
   })
 
   const { data: species, isLoading: loading2 } = useQuery({
     queryKey: ['pokemon-species', get(pokemon, 'species.url')],
     queryFn: () => ky.get(pokemon!.species.url).json<PokeAPI.PokemonSpecies>(),
-    enabled: !!pokemon && !!intersection?.isIntersecting,
+    enabled: !!pokemon && !!isIntersecting,
   })
 
   const typesData = useQueries({
@@ -67,7 +64,7 @@ export default function Card({ url, className }: { url: string; className?: stri
 
   return (
     <Link
-      ref={intersectionRef}
+      ref={ref}
       href={pokemon ? pokemon.name : '/'}
       style={{
         backgroundColor: color,

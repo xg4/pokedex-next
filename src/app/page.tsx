@@ -22,25 +22,22 @@ export default async function Page({ searchParams }: { searchParams: { page: str
         <img className="w-60 object-contain" src="/images/logo.png" alt="" />
         <h1 className="font-mono text-3xl text-gray-600">宝可梦</h1>
       </header>
-      <section className="flex flex-col justify-center">
-        <div className="flex flex-wrap justify-center gap-10 p-6">
-          {data.results.map(pokemon => (
-            <Card key={pokemon.url} url={pokemon.url} />
-          ))}
-        </div>
-        <div className="flex justify-around p-4">
-          {page < 2 ? null : (
-            <Link
-              href={{
-                query: {
-                  page: page - 1,
-                },
-              }}
-            >
-              上一页
-            </Link>
-          )}
+      <div className="flex justify-around p-4">
+        {page < 2 ? null : (
           <Link
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-800"
+            href={{
+              query: {
+                page: page - 1,
+              },
+            }}
+          >
+            上一页
+          </Link>
+        )}
+        {data.results.length < pageSize ? null : (
+          <Link
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-800"
             href={{
               query: {
                 page: page + 1,
@@ -49,6 +46,13 @@ export default async function Page({ searchParams }: { searchParams: { page: str
           >
             下一页
           </Link>
+        )}
+      </div>
+      <section className="flex flex-col justify-center">
+        <div className="flex flex-wrap justify-center gap-10 p-6">
+          {data.results.map(pokemon => (
+            <Card key={pokemon.url} url={pokemon.url} />
+          ))}
         </div>
       </section>
     </>
